@@ -68,7 +68,7 @@ async function findUserAsync(res, username) {
         const userQuery = { username: username };
         const userResult = await userCoollection.findOne(userQuery);
         console.log('Searched for username :"' + username + '" - Found: ' + JSON.stringify(userResult))
-        res.send(userResult)
+        res.json(userResult)
 
     } finally {
         await client.close();
@@ -85,7 +85,7 @@ async function findUsersAsync(res) {
 
         const usersResult = await userCoollection.find({}).toArray();
         console.log('Searched for Users - Found: ' + JSON.stringify(usersResult))
-        res.send(usersResult)
+        res.json(usersResult)
 
     } finally {
         await client.close();
@@ -106,10 +106,8 @@ const getUser = (req, res) => {
 
 app.get("/Users", getUsers);
 app.get('/Users/:username', getUser);
-
-
 app.get('/', (req, res) => {
-    res.send('Hello World')
+    res.send('Mood Tracker App API Server Main Page.')
 })
 
 const PORT = process.env.PORT
