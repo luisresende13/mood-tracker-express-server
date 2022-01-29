@@ -70,32 +70,7 @@ async function findUserAsync(res, username) {
         const userQuery = { username: username };
         const userResult = await userCollection.findOne(userQuery);
         console.log('Searched for username :"' + username + '" - Found: ' + JSON.stringify(userResult))
-        res.json(userResult)
-
-    } finally {
-        await client.close();
-        console.log('Database connection closed')
-    }
-}
-
-async function postUserAsync(req, res, username) {
-    try {
-        await client.connect();
-
-        const database = client.db(databaseName);
-        const userCollection = database.collection("Users");
-        console.log('Handling POST request for user: ' + req.params.username)
-        console.log('Request body: ')
-        console.log(JSON.stringify(req.body))
-        const user_doc = {
-            username: username,
-            password: req.body.password,
-            email: req.body.email,
-            entries: [],
-        }
-        const userResult = await userCollection.insertOne(user_doc);
-        console.log(`A User document was inserted into 'Users' collection with the _id: ${userResult.insertedId}`);
-        res.json(userResult)
+        res.send(JSON.stringify(userResult))
 
     } finally {
         await client.close();
@@ -113,6 +88,33 @@ async function findUsersAsync(res) {
         const usersResult = await userCoollection.find({}).toArray();
         console.log('Searched for Users - Found: ' + JSON.stringify(usersResult))
         res.json(usersResult)
+
+    } finally {
+        await client.close();
+        console.log('Database connection closed')
+    }
+}
+
+async function postUserAsync(req, res, username) {
+    try {
+        await client.connect();
+
+        const database = client.db(databaseName);
+        const userCollection = database.collection("Users");
+
+        console.log('Handling POST request for user: ' + req.params.username)
+        const user_doc = {
+            username: username,
+            password: req.body.password,
+            email: req.body.email,
+            entries: [],
+        }
+        const userResult = await userCollection.insertOne(user_doc);
+
+        console.log(`A user document was inserted into 'Users' collection with _id: ${userResult.insertedId}`);
+        res.write('Posted new user with id: ' + userRequest.insertedId)
+        res.write('POST Result:')
+        res.end(userResult.body)
 
     } finally {
         await client.close();
