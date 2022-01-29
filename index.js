@@ -67,7 +67,7 @@ const client = new MongoClient(uri);
 // }
 
 
-function findUserAsync(username) {
+async function findUserAsync(res, username) {
     try {
         await client.connect();
 
@@ -77,7 +77,7 @@ function findUserAsync(username) {
         const userQuery = { username: username };
         const userResult = await userCoollection.findOne(userQuery);
         console.log('Searched for username :"' + username + '" - Found: ' + JSON.stringify(userResult))
-        return userResult
+        res.send(userResult)
 
     } finally {
         await client.close();
@@ -85,16 +85,16 @@ function findUserAsync(username) {
     }
 }
 
-function findUsersAsync() {
+async function findUsersAsync(res) {
     try {
         await client.connect();
 
         const database = client.db(databaseName);
         const userCoollection = database.collection("Users");
 
-        const usersResult = await userCoollection.find({});
-        console.log('Searched for Users :"' + username + '" - Found: ' + JSON.stringify(usersResult))
-        return usersResult
+        const usersResult = await userCoollection.find({}).toArray();
+        console.log('Searched for Users - Found: ' + JSON.stringify(usersResult))
+        res.send(usersResult)
 
     } finally {
         await client.close();
@@ -104,13 +104,13 @@ function findUsersAsync() {
 
 const getUsers = (req, res) => {
 
-    const usersResult = findUsersAsync().catch(console.dir);
-    res.send( usersResult );
+    const usersResult = findUsersAsync(res).catch(console.dir);
+    console.log('Trying to connect ...')
 }
 const getUser = (req, res) => {
 
-    const userResult = findUserAsync(req.params.username).catch(console.dir);
-    res.send( userResult );
+    const userResult = findUserAsync(res, req.params.username).catch(console.dir);
+    console.log('Trying to connect ...')
 }    
 
 app.get("/Users", getUsers);
@@ -121,7 +121,7 @@ app.get('/', (req, res) => {
     res.send('Hello World')
 })
 
-const PORT = process.env.PORT
+const PORT = process.env.PORT | 3000
 // const PORT = 3000;
 
 app.listen(PORT);
