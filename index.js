@@ -1,17 +1,16 @@
-// const { MongoClient } = require("mongodb");
+const { MongoClient } = require("mongodb");
 
 const express = require("express");
 const app = express();
 
-// function mongoURI(mongoAdminPassword, databaseName) {
-//     return "mongodb+srv://admin:" + mongoAdminPassword + "@mood-tracker-cluster.f0b5r.mongodb.net/" + databaseName + "?retryWrites=true&w=majority";
-// }
-// const databaseName = 'MoodTrackerDatabase'
-// const mongoAdminPassword = 'admin'
-// //const collectionName = 'EntriesCollection'
+function mongoURI(mongoAdminPassword, databaseName) {
+    return "mongodb+srv://admin:" + mongoAdminPassword + "@mood-tracker-cluster.f0b5r.mongodb.net/" + databaseName + "?retryWrites=true&w=majority";
+}
+const databaseName = 'MoodTrackerDatabase'
+const mongoAdminPassword = 'admin'
 
-// const uri = mongoURI(mongoAdminPassword, databaseName)
-// const client = new MongoClient(uri);
+const uri = mongoURI(mongoAdminPassword, databaseName)
+const client = new MongoClient(uri);
 
 // async function signup(username, password, email) {
 //     try {
@@ -53,27 +52,6 @@ const app = express();
 //     }
 // }
 
-// async function signin(username, password) {
-//     try {
-//         await client.connect();
-
-//         const database = client.db(databaseName);
-//         const userCoollection = database.collection("Users");
-
-//         const userQuery = { username: username };
-//         const options = {};
-//         const userResult = await userCoollection.findOne(userQuery, options);
-//         console.log('Procurando por username "' + username + '" - Encontrado: ' + JSON.stringify(userResult))
-//         return userResult
-//         // if (userResult) {
-//         //     return
-//         // }
-
-//     } finally {
-//         await client.close();
-//         console.log('Database connection closed')
-//     }
-// }
 
 // const postUser = (req, res) => {
 //     const userResult = signup('username', 'password', 'example@email.com').catch(console.dir);
@@ -88,8 +66,56 @@ const app = express();
 
 // }
 
-// app.get("/Users", getUsers);
-// app.post('/Users/:user', postUser)
+
+async function findUserAsync(username) {
+    try {
+        await client.connect();
+
+        const database = client.db(databaseName);
+        const userCoollection = database.collection("Users");
+
+        const userQuery = { username: username };
+        const userResult = await userCoollection.findOne(userQuery);
+        console.log('Searched for username :"' + username + '" - Found: ' + JSON.stringify(userResult))
+        return userResult
+
+    } finally {
+        await client.close();
+        console.log('Database connection closed')
+    }
+}
+
+async function findUsersAsync() {
+    try {
+        await client.connect();
+
+        const database = client.db(databaseName);
+        const userCoollection = database.collection("Users");
+
+        const usersResult = await userCoollection.find({});
+        console.log('Searched for Users :"' + username + '" - Found: ' + JSON.stringify(usersResult))
+        return usersResult
+
+    } finally {
+        await client.close();
+        console.log('Database connection closed')
+    }
+}
+
+const getUsers = (req, res) => {
+
+    const usersResult = findUsersAsync().catch(console.dir);
+    res.send( usersResult );
+}
+const getUser = (req, res) => {
+
+    const userResult = findUserAsync(req.params.username).catch(console.dir);
+    res.send( userResult );
+}    
+
+app.get("/Users", getUsers);
+app.get('/Users/:username', getUser);
+
 
 app.get('/', (req, res) => {
     res.send('Hello World')
