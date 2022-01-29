@@ -91,7 +91,7 @@ const app = express();
 // app.get("/Users", getUsers);
 // app.post('/Users/:user', postUser)
 
-app.get('/', (req, res) {
+app.get('/', (req, res) => {
     res.send('Hello World')
 })
 
