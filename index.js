@@ -82,7 +82,9 @@ async function postUserAsync(req, res, username) {
 
         const database = client.db(databaseName);
         const userCollection = database.collection("Users");
-
+        console.log('Handling POST request for user: ' + req.params.username)
+        console.log('Request body: ')
+        console.log(JSON.stringify(req.body))
         const user_doc = {
             username: username,
             password: req.body.password,
