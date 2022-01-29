@@ -58,15 +58,6 @@ const client = new MongoClient(uri);
 //     res.send( userResult );
 // }
 
-// const getUsers = (req, res) => {
-
-//     const userResult = signin('username', 'password').catch(console.dir);
-//     res.send( userResult );
-    
-
-// }
-
-
 async function findUserAsync(res, username) {
     try {
         await client.connect();
@@ -121,7 +112,7 @@ app.get('/', (req, res) => {
     res.send('Hello World')
 })
 
-const PORT = process.env.PORT | 3000
+const PORT = process.env.PORT
 // const PORT = 3000;
 
 app.listen(PORT);
