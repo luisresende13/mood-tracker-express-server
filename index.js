@@ -112,8 +112,7 @@ async function postUserAsync(req, res, username) {
         const userResult = await userCollection.insertOne(user_doc);
 
         console.log(`A user document was inserted into 'Users' collection with _id: ${userResult.insertedId}`);
-        res.write('Posted new user with id: ' + userRequest.insertedId)
-        res.write('POST Result:')
+        res.write('POST Result Body:')
         res.end(userResult.body)
 
     } finally {
