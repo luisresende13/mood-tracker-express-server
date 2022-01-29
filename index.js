@@ -1,7 +1,9 @@
 const { MongoClient } = require("mongodb");
-
 const express = require("express");
+var bodyParser = require('body-parser')
+
 const app = express();
+var jsonParser = bodyParser.json()
 
 function mongoURI(mongoAdminPassword, databaseName) {
     return "mongodb+srv://admin:" + mongoAdminPassword + "@mood-tracker-cluster.f0b5r.mongodb.net/" + databaseName + "?retryWrites=true&w=majority";
@@ -137,7 +139,7 @@ const postUser = (req, res) => {
 
 app.get("/Users", getUsers);
 app.get('/Users/:username', getUser);
-app.post('/Users/:username', postUser)
+app.post('/Users/:username', jsonParser, postUser)
 app.get('/', (req, res) => {
     res.send('Mood Tracker App API Server Main Page.')
 })
