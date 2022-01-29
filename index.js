@@ -63,11 +63,34 @@ async function findUserAsync(res, username) {
         await client.connect();
 
         const database = client.db(databaseName);
-        const userCoollection = database.collection("Users");
+        const userCollection = database.collection("Users");
 
         const userQuery = { username: username };
-        const userResult = await userCoollection.findOne(userQuery);
+        const userResult = await userCollection.findOne(userQuery);
         console.log('Searched for username :"' + username + '" - Found: ' + JSON.stringify(userResult))
+        res.json(userResult)
+
+    } finally {
+        await client.close();
+        console.log('Database connection closed')
+    }
+}
+
+async function postUserAsync(req, res, username) {
+    try {
+        await client.connect();
+
+        const database = client.db(databaseName);
+        const userCollection = database.collection("Users");
+
+        const user_doc = {
+            username: username,
+            password: req.body.password,
+            email: req.body.email,
+            entries: [],
+        }
+        const userResult = await userCollection.insertOne(user_doc);
+        console.log(`A User document was inserted into 'Users' collection with the _id: ${userResult.insertedId}`);
         res.json(userResult)
 
     } finally {
@@ -103,9 +126,16 @@ const getUser = (req, res) => {
     const userResult = findUserAsync(res, req.params.username).catch(console.dir);
     console.log('Trying to connect ...')
 }    
+const postUser = (req, res) => {
+
+    const userResult = postUserAsync(req, res, req.params.username).catch(console.dir);
+    console.log('Trying to connect ...')
+}    
+
 
 app.get("/Users", getUsers);
 app.get('/Users/:username', getUser);
+app.post('/Users/:username', postUser)
 app.get('/', (req, res) => {
     res.send('Mood Tracker App API Server Main Page.')
 })
