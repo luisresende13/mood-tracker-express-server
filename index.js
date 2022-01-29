@@ -67,7 +67,7 @@ const client = new MongoClient(uri);
 // }
 
 
-async function findUserAsync(username) {
+function findUserAsync(username) {
     try {
         await client.connect();
 
@@ -85,7 +85,7 @@ async function findUserAsync(username) {
     }
 }
 
-async function findUsersAsync() {
+function findUsersAsync() {
     try {
         await client.connect();
 
