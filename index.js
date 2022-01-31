@@ -1,4 +1,4 @@
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 const express = require("express");
 var bodyParser = require('body-parser')
 
@@ -91,7 +91,7 @@ async function postUserEntryAsync(req, res) {
         const options = {};
         const updateDoc = {
             $set: {
-                entries: [ ...User.entries, { user_id: User._id, ...req.body }]
+                entries: [ ...User.entries, { _id: ObjectId, user_id: User._id, ...req.body }]
             },
         };
         const result = await userCollection.updateOne(filter, updateDoc, options);
