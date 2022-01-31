@@ -38,7 +38,7 @@ async function findUsersAsync(res) {
         const database = client.db(databaseName);
         const userCoollection = database.collection("Users");
 
-        const usersResult = await userCoollection.find({}).toArray();
+        const usersResult = await userCoollection.find({}, {sort: {_id: -1}}).toArray();
         console.log('Searched for Users - Found: ' + JSON.stringify(usersResult))
         res.json(usersResult)
 
