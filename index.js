@@ -3,7 +3,6 @@ const express = require("express");
 var bodyParser = require('body-parser')
 
 const app = express();
-var jsonParser = bodyParser.json()
 
 function mongoURI(mongoAdminPassword, databaseName) {
     return "mongodb+srv://admin:" + mongoAdminPassword + "@mood-tracker-cluster.f0b5r.mongodb.net/" + databaseName + "?retryWrites=true&w=majority";
@@ -13,52 +12,6 @@ const mongoAdminPassword = 'admin'
 
 const uri = mongoURI(mongoAdminPassword, databaseName)
 const client = new MongoClient(uri);
-
-// async function signup(username, password, email) {
-//     try {
-//         await client.connect();
-
-//         const database = client.db(databaseName);
-//         const userCollection = database.collection("Users");
-
-//         // const userQuery = { username: username };
-//         // const options = {};
-//         // const userResult = await userCoollection.findOne(userQuery, options);
-//         // console.log('Procurando por username "' + username + '" - Encontrado: ' + JSON.stringify(userResult))
-//         // if (userResult) {
-//         //     alert('Nome de usuário já cadastrado.');
-//         //     return;
-//         // }
-
-//         // const emailQuery = { email: email };
-//         // const emailResult = await userCoollection.findOne(emailQuery, options);
-//         // console.log('Procurando por email "' + email + '" - Encontrado: ' + JSON.stringify(emailResult))
-//         // if (emailResult) {
-//         //     alert('Email de usuário já cadastrado.');
-//         //     return;
-//         // }
-        
-//         // create a document to insert
-//         const user_doc = {
-//             username: username,
-//             password: password,
-//             email: email,
-//             entries: [],
-//         }
-//         const insertOne_Result = await userCollection.insertOne(user_doc);
-//         console.log(`A User document was inserted into 'Users' collection with the _id: ${insertOne_Result.insertedId}`);
-
-//     } finally {
-//         await client.close();
-//         console.log('Database connection closed')
-//     }
-// }
-
-
-// const postUser = (req, res) => {
-//     const userResult = signup('username', 'password', 'example@email.com').catch(console.dir);
-//     res.send( userResult );
-// }
 
 async function findUserAsync(res, username) {
     try {
@@ -95,7 +48,7 @@ async function findUsersAsync(res) {
     }
 }
 
-async function postUserAsync(req, res, username) {
+async function postUserAsync(req, res) {
     try {
         await client.connect();
 
@@ -104,7 +57,7 @@ async function postUserAsync(req, res, username) {
 
         console.log('Handling POST request for user: ' + req.params.username)
         const user_doc = {
-            username: username,
+            username: req.params.username,
             password: req.body.password,
             email: req.body.email,
             entries: [],
@@ -121,31 +74,74 @@ async function postUserAsync(req, res, username) {
     }
 }
 
-const getUsers = (req, res) => {
+async function postUserEntryAsync(req, res) {
+    try {
+        console.log('Request received: POST user entry. Attempting to connect...')
+        await client.connect();
 
+        const database = await client.db(databaseName);
+        const userCollection = await database.collection("Users");
+        
+        if (userCollection) {console.log('Connected successfully to "Users" database...')}
+
+        var User = await userCollection.findOne({username: req.params.username})
+        if (User) {console.log('User information returned successfully....')}
+
+        const filter = { username: req.params.username };
+        const options = {};
+        const updateDoc = {
+            $set: {
+                entries: [ ...User.entries, { user_id: User._id, ...req.body }]
+            },
+        };
+        const result = await userCollection.updateOne(filter, updateDoc, options);
+
+        resMsg = `${result.matchedCount} user document(s) matched the filter, updated ${result.modifiedCount} user document(s)`
+        console.log(resMsg);
+        res.json(JSON.stringify(req.body))
+    
+    // } catch(error) {
+    //     console.log(error)
+
+    } finally {
+        await client.close();
+        console.log('Database connection closed')
+    }
+}
+
+
+const getUsers = (req, res) => {
     const usersResult = findUsersAsync(res).catch(console.dir);
     console.log('Trying to connect ...')
 }
 const getUser = (req, res) => {
-
     const userResult = findUserAsync(res, req.params.username).catch(console.dir);
     console.log('Trying to connect ...')
 }    
 const postUser = (req, res) => {
-
-    const userResult = postUserAsync(req, res, req.params.username).catch(console.dir);
+    const userResult = postUserAsync(req, res).catch(console.dir);
+    console.log('Trying to connect ...')
+}    
+const postUserEntry = (req, res) => {
+    const userEntryResult = postUserEntryAsync(req, res).catch(console.dir);
     console.log('Trying to connect ...')
 }    
 
 
+var jsonParser = bodyParser.json()
+
 app.get("/Users", getUsers);
 app.get('/Users/:username', getUser);
 app.post('/Users/:username', jsonParser, postUser)
+app.post('/Users/:username/entries', jsonParser, postUserEntry)
 app.get('/', (req, res) => {
-    res.send('Mood Tracker App API Server Main Page.')
+    res.send('Mood Tracker App Server API.')
 })
 
-const PORT = process.env.PORT
-// const PORT = 3000;
 
-app.listen(PORT);
+// const PORT = process.env.PORT
+const PORT = 3000;
+
+app.listen(PORT, () => {
+    console.log('Server started at port ' + PORT + '.')
+});
