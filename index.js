@@ -91,7 +91,7 @@ async function postUserEntryAsync(req, res) {
         const options = {};
         const updateDoc = {
             $set: {
-                entries: [ ...User.entries, { _id: ObjectId, user_id: User._id, ...req.body }]
+                entries: [ ...User.entries, { _id: new ObjectId(), user_id: User._id, ...req.body }]
             },
         };
         const result = await userCollection.updateOne(filter, updateDoc, options);
@@ -100,8 +100,9 @@ async function postUserEntryAsync(req, res) {
         console.log(resMsg);
         res.json(JSON.stringify(req.body))
     
-    // } catch(error) {
-    //     console.log(error)
+    } catch(error) {
+        console.log('Catched error...')
+        console.log(error)
 
     } finally {
         await client.close();
@@ -138,9 +139,12 @@ app.get('/', (req, res) => {
     res.send('Mood Tracker App Server API.')
 })
 
-
-const PORT = process.env.PORT
-// const PORT = 3000;
+var PORT 
+if (process.env.PORT) {
+    PORT = process.env.PORT
+} else {
+    PORT = 3000;
+}
 
 app.listen(PORT, () => {
     console.log('Server started at port ' + PORT + '.')
