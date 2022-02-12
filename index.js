@@ -146,6 +146,43 @@ async function deleteUserEntryAsync(req, res) {
     }
 }
 
+async function putUserEntryAsync(req, res) {
+    try {
+        console.log('Request received: PUT user entry. Attempting to connect...')
+        await client.connect();
+
+        const database = await client.db(databaseName);
+        const userCollection = await database.collection("Users");
+        
+        if (userCollection) {console.log('Connected successfully to "Users" database...')}
+
+        var User = await userCollection.findOne({username: req.params.username})
+        if (User) {console.log('User information returned successfully....')}
+
+        // const filter = { username: req.params.username };
+        const filter = { username: req.params.username };
+        const options = {};
+        const updateDoc = {
+            $set: {
+                entries: [ ...User.entries.filter( (entry) => entry._id != req.params.entryId ), { _id: ObjectId(req.params.entryId), user_id: User._id, ...req.body } ]
+            },
+        };
+        const result = await userCollection.updateOne(filter, updateDoc, options);
+
+        resMsg = `${result.matchedCount} user entry document(s) matched the filter, updated ${result.modifiedCount} user document(s)`
+        console.log(resMsg);
+        res.json(JSON.stringify(req.body))
+    
+    } catch(error) {
+        console.log('Catched error...')
+        console.log(error)
+
+    } finally {
+        await client.close();
+        console.log('Database connection closed')
+    }
+}
+
 const getUsers = (req, res) => {
     const usersResult = findUsersAsync(res).catch(console.dir);
     console.log('Trying to connect ...')
@@ -166,6 +203,10 @@ const deleteUserEntry = (req, res) => {
     const deleteUserEntryResult = deleteUserEntryAsync(req, res).catch(console.dir);
     console.log('Trying to connect ...')
 }
+const putUserEntry = (req, res) => {
+    const putUserEntryResult = putUserEntryAsync(req, res).catch(console.dir);
+    console.log('Trying to connect ...')
+}
 
 var jsonParser = bodyParser.json()
 
@@ -174,6 +215,7 @@ app.get('/Users/:username', getUser);
 app.post('/Users/:username', jsonParser, postUser)
 app.post('/Users/:username/entries', jsonParser, postUserEntry)
 app.delete('/Users/:username/entries/:entryId', deleteUserEntry)
+app.put('/Users/:username/entries/:entryId', putUserEntry)
 
 app.get('/', (req, res) => {
     res.send('Mood Tracker App Server API.')
