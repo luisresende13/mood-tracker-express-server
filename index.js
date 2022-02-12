@@ -39,7 +39,7 @@ async function findUsersAsync(res) {
         const userCoollection = database.collection("Users");
 
         const usersResult = await userCoollection.find({}, {sort: {_id: -1}}).toArray();
-        console.log('Searched for Users - Found: ' + JSON.stringify(usersResult))
+        console.log(`Searched for "Users" collection - Found ${usersResult.length} Users!`)
         res.json(usersResult)
 
     } finally {
