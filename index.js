@@ -215,7 +215,7 @@ app.get('/Users/:username', getUser);
 app.post('/Users/:username', jsonParser, postUser)
 app.post('/Users/:username/entries', jsonParser, postUserEntry)
 app.delete('/Users/:username/entries/:entryId', deleteUserEntry)
-app.put('/Users/:username/entries/:entryId', putUserEntry)
+app.put('/Users/:username/entries/:entryId', jsonParser, putUserEntry)
 
 app.get('/', (req, res) => {
     res.send('Mood Tracker App Server API.')
