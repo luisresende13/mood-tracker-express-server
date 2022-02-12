@@ -110,6 +110,41 @@ async function postUserEntryAsync(req, res) {
     }
 }
 
+async function deleteUserEntryAsync(req, res) {
+    try {
+        console.log('Request received: DELETE user entry. Attempting to connect...')
+        await client.connect();
+
+        const database = await client.db(databaseName);
+        const userCollection = await database.collection("Users");
+        
+        if (userCollection) {console.log('Connected successfully to "Users" database...')}
+
+        var User = await userCollection.findOne({username: req.params.username})
+        if (User) {console.log('User information returned successfully....')}
+
+        const filter = { username: req.params.username };
+        const options = {};
+        const updateDoc = {
+            $set: {
+                entries: [ ...User.entries.filter( (entry) => entry._id != req.params.entryId ) ]
+            },
+        };
+        const result = await userCollection.updateOne(filter, updateDoc, options);
+
+        resMsg = `${result.matchedCount} user entry document(s) matched the filter, deleted ${result.modifiedCount} user document(s)`
+        console.log(resMsg);
+        res.json(JSON.stringify(req.body))
+    
+    } catch(error) {
+        console.log('Catched error...')
+        console.log(error)
+
+    } finally {
+        await client.close();
+        console.log('Database connection closed')
+    }
+}
 
 const getUsers = (req, res) => {
     const usersResult = findUsersAsync(res).catch(console.dir);
@@ -122,12 +157,15 @@ const getUser = (req, res) => {
 const postUser = (req, res) => {
     const userResult = postUserAsync(req, res).catch(console.dir);
     console.log('Trying to connect ...')
-}    
+}
 const postUserEntry = (req, res) => {
     const userEntryResult = postUserEntryAsync(req, res).catch(console.dir);
     console.log('Trying to connect ...')
-}    
-
+}
+const deleteUserEntry = (req, res) => {
+    const deleteUserEntryResult = deleteUserEntryAsync(req, res).catch(console.dir);
+    console.log('Trying to connect ...')
+}
 
 var jsonParser = bodyParser.json()
 
@@ -135,6 +173,8 @@ app.get("/Users", getUsers);
 app.get('/Users/:username', getUser);
 app.post('/Users/:username', jsonParser, postUser)
 app.post('/Users/:username/entries', jsonParser, postUserEntry)
+app.delete('/Users/:username/entries/:entryId', deleteUserEntry)
+
 app.get('/', (req, res) => {
     res.send('Mood Tracker App Server API.')
 })
