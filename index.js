@@ -159,11 +159,8 @@ async function putUserEntryAsync(req, res) {
         var User = await userCollection.findOne({username: req.params.username})
         if (User) {console.log('User information returned successfully....')}
 
-        console.log('Searching user entry to be updated...')
         const entry = User.entries.filter( (entry) => entry._id == req.params.entryId )[0]
-        console.log('user entry to be updated found: ' + JSON.stringify(entry))
         const entryIndex = User.entries.indexOf(entry)
-        console.log('Index of user entry to be updated found: ' + entryIndex)
         
         const filter = { username: req.params.username };
         const options = {};
