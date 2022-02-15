@@ -79,8 +79,8 @@ async function postUserEntryAsync(req, res) {
         console.log('Request received: POST user entry. Attempting to connect...')
         await client.connect();
 
-        const database = await client.db(databaseName);
-        const userCollection = await database.collection("Users");
+        const database = client.db(databaseName);
+        const userCollection = database.collection("Users");
         
         if (userCollection) {console.log('Connected successfully to "Users" database...')}
 
@@ -115,8 +115,8 @@ async function deleteUserEntryAsync(req, res) {
         console.log('Request received: DELETE user entry. Attempting to connect...')
         await client.connect();
 
-        const database = await client.db(databaseName);
-        const userCollection = await database.collection("Users");
+        const database = client.db(databaseName);
+        const userCollection = database.collection("Users");
         
         if (userCollection) {console.log('Connected successfully to "Users" database...')}
 
@@ -151,8 +151,8 @@ async function putUserEntryAsync(req, res) {
         console.log('Request received: PUT user entry. Attempting to connect...')
         await client.connect();
 
-        const database = await client.db(databaseName);
-        const userCollection = await database.collection("Users");
+        const database = client.db(databaseName);
+        const userCollection = database.collection("Users");
         
         if (userCollection) {console.log('Connected successfully to "Users" database...')}
 
@@ -190,28 +190,108 @@ async function putUserEntryAsync(req, res) {
     }
 }
 
+async function postUserEmotionAsync(req, res) {
+    try {
+        console.log('Request received: POST user emotion. Attempting to connect...')
+        await client.connect();
+
+        const database = client.db(databaseName);
+        const userCollection = database.collection("Users");
+        
+        if (userCollection) {console.log('Connected successfully to "Users" database...')}
+
+        var User = await userCollection.findOne({username: req.params.username})
+        if (User) {console.log('User information returned successfully....')}
+
+        const filter = { username: req.params.username };
+        const options = {};
+        const updateDoc = {
+            $set: {
+                emotions: [ ...User.emotions, { ...req.body }]
+            },
+        };
+        const result = await userCollection.updateOne(filter, updateDoc, options);
+
+        resMsg = `${result.matchedCount} user document(s) matched the filter, updated ${result.modifiedCount} user document(s)`
+        console.log(resMsg);
+        res.json(JSON.stringify(req.body))
+    
+    } catch (error) {
+        console.log('Catched error...')
+        console.log(error)
+
+    } finally {
+        await client.close();
+        console.log('Database connection closed')
+    }
+}
+
+async function deleteUserEmotionAsync(req, res) {
+    try {
+        console.log('Request received: DELETE user emotion. Attempting to connect...')
+        await client.connect();
+
+        const database = client.db(databaseName);
+        const userCollection = database.collection("Users");
+        
+        if (userCollection) {console.log('Connected successfully to "Users" database...')}
+
+        var User = await userCollection.findOne({username: req.params.username})
+        if (User) {console.log('User information returned successfully....')}
+
+        const filter = { username: req.params.username };
+        const options = {};
+        const updateDoc = {
+            $set: {
+                emotions: [ ...User.emotions.filter( (emotion) => emotion.name != req.params.emotionName ) ]
+            },
+        };
+        const result = await userCollection.updateOne(filter, updateDoc, options);
+
+        resMsg = `${result.matchedCount} user entry document(s) matched the filter, deleted ${result.modifiedCount} user document(s)`
+        console.log(resMsg);
+        res.json(JSON.stringify(req.body))
+    
+    } catch(error) {
+        console.log('Catched error...')
+        console.log(error)
+
+    } finally {
+        await client.close();
+        console.log('Database connection closed')
+    }
+}
+
 const getUsers = (req, res) => {
-    const usersResult = findUsersAsync(res).catch(console.dir);
+    findUsersAsync(res).catch(console.dir);
     console.log('Trying to connect ...')
 }
 const getUser = (req, res) => {
-    const userResult = findUserAsync(res, req.params.username).catch(console.dir);
+    findUserAsync(res, req.params.username).catch(console.dir);
     console.log('Trying to connect ...')
 }    
 const postUser = (req, res) => {
-    const userResult = postUserAsync(req, res).catch(console.dir);
+    postUserAsync(req, res).catch(console.dir);
     console.log('Trying to connect ...')
 }
 const postUserEntry = (req, res) => {
-    const userEntryResult = postUserEntryAsync(req, res).catch(console.dir);
+    postUserEntryAsync(req, res).catch(console.dir);
     console.log('Trying to connect ...')
 }
 const deleteUserEntry = (req, res) => {
-    const deleteUserEntryResult = deleteUserEntryAsync(req, res).catch(console.dir);
+    deleteUserEntryAsync(req, res).catch(console.dir);
     console.log('Trying to connect ...')
 }
 const putUserEntry = (req, res) => {
-    const putUserEntryResult = putUserEntryAsync(req, res).catch(console.dir);
+    putUserEntryAsync(req, res).catch(console.dir);
+    console.log('Trying to connect ...')
+}
+const postUserEmotion = (req, res) => {
+    postUserEmotionAsync(req, res).catch(console.dir);
+    console.log('Trying to connect ...')
+}
+const deleteUserEmotion = (req, res) => {
+    deleteUserEmotionAsync(req, res).catch(console.dir);
     console.log('Trying to connect ...')
 }
 
@@ -223,6 +303,8 @@ app.post('/Users/:username', jsonParser, postUser)
 app.post('/Users/:username/entries', jsonParser, postUserEntry)
 app.delete('/Users/:username/entries/:entryId', deleteUserEntry)
 app.put('/Users/:username/entries/:entryId', jsonParser, putUserEntry)
+app.post('/Users/:username/emotions', jsonParser, postUserEmotion)
+app.delete('/Users/:username/emotions/:emotionName', deleteUserEmotion)
 
 app.get('/', (req, res) => {
     res.send('Mood Tracker App Server API.')
