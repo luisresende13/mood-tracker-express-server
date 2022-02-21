@@ -61,7 +61,8 @@ async function postUserAsync(req, res) {
             password: req.body.password,
             email: req.body.email,
             emotions: req.body.emotions,
-            entries: [],
+            entries: req.body.entries,
+            layout: req.body.layout
         }
         const userResult = await userCollection.insertOne(user_doc);
 
