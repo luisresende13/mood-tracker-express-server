@@ -57,12 +57,13 @@ async function postUserAsync(req, res) {
 
         console.log('Handling POST request for user: ' + req.params.username)
         const user_doc = {
+            ...req.body,
             username: req.params.username,
-            password: req.body.password,
-            email: req.body.email,
-            emotions: req.body.emotions,
-            entries: req.body.entries,
-            layout: req.body.layout
+            // password: req.body.password,
+            // email: req.body.email,
+            // emotions: req.body.emotions,
+            // entries: req.body.entries,
+            // layout: req.body.layout
         }
         const userResult = await userCollection.insertOne(user_doc);
 
@@ -296,6 +297,40 @@ async function postUserEmotionLayoutAsync(req, res) {
     }
 }
 
+async function postUserSettingsAsync(req, res) {
+    try {
+        console.log('Request received: POST user settings. Attempting to connect...')
+        await client.connect();
+        const database = client.db(databaseName);
+        const userCollection = database.collection("Users");
+        if (userCollection) {console.log('Connected successfully to "Users" database...')}
+
+        var User = await userCollection.findOne({username: req.params.username})
+        if (User) {console.log('User information returned successfully....')}
+
+        const filter = { username: req.params.username };
+        const options = {};
+        const updateDoc = {
+            $set: {
+                settings: { ...User.settings, ...req.body}
+            },
+        };
+        const result = await userCollection.updateOne(filter, updateDoc, options);
+
+        resMsg = `${result.matchedCount} user document(s) matched the filter, updated ${result.modifiedCount} user document(s)`
+        console.log(resMsg);
+        res.json(JSON.stringify(req.body))
+    
+    } catch (error) {
+        console.log('Catched error...')
+        console.log(error)
+
+    } finally {
+        await client.close();
+        console.log('Database connection closed')
+    }
+}
+
 
 const getUsers = (req, res) => {
     findUsersAsync(res).catch(console.dir);
@@ -333,6 +368,10 @@ const postUserEmotionLayout = (req, res) => {
     postUserEmotionLayoutAsync(req, res).catch(console.dir);
     console.log('Trying to connect ...')
 }
+const postUserSettings = (req, res) => {
+    postUserSettingsAsync(req, res).catch(console.dir);
+    console.log('Trying to connect ...')
+}
 
 var jsonParser = bodyParser.json()
 
@@ -345,6 +384,7 @@ app.put('/Users/:username/entries/:entryId', jsonParser, putUserEntry)
 app.post('/Users/:username/emotions', jsonParser, postUserEmotion)
 app.delete('/Users/:username/emotions/:emotionName', deleteUserEmotion)
 app.post('/Users/:username/layout', jsonParser, postUserEmotionLayout)
+app.post('/Users/:username/settings', jsonParser, postUserSettings)
 
 app.get('/', (req, res) => {
     res.send('Mood Tracker App Server API.')
