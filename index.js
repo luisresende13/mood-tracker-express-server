@@ -13,24 +13,6 @@ const mongoAdminPassword = 'admin'
 const uri = mongoURI(mongoAdminPassword, databaseName)
 const client = new MongoClient(uri);
 
-async function findUserAsync(res, username) {
-    try {
-        await client.connect();
-
-        const database = client.db(databaseName);
-        const userCollection = database.collection("Users");
-
-        const userQuery = { username: username };
-        const userResult = await userCollection.findOne(userQuery);
-        console.log('Searched for username :"' + username + '" - Found: ' + JSON.stringify(userResult))
-        res.send(JSON.stringify(userResult))
-
-    } finally {
-        await client.close();
-        console.log('Database connection closed')
-    }
-}
-
 async function findUsersAsync(res) {
     try {
         await client.connect();
@@ -48,6 +30,24 @@ async function findUsersAsync(res) {
     }
 }
 
+async function findUserAsync(req, res) {
+    try {
+        await client.connect();
+
+        const database = client.db(databaseName);
+        const userCollection = database.collection("Users");
+
+        const userQuery = { username: req.params.username };
+        const userResult = await userCollection.findOne(userQuery);
+        console.log('Searched for username :"' + req.params.username + '" - Found:\n' + JSON.stringify(userResult))
+        res.send(JSON.stringify(userResult))
+
+    } finally {
+        await client.close();
+        console.log('Database connection closed')
+    }
+}
+
 async function postUserAsync(req, res) {
     try {
         await client.connect();
@@ -58,7 +58,7 @@ async function postUserAsync(req, res) {
         console.log('Handling POST request for user: ' + req.params.username)
         const user_doc = {
             ...req.body,
-            username: req.params.username,
+            // username: req.params.username,
             // password: req.body.password,
             // email: req.body.email,
             // emotions: req.body.emotions,
@@ -337,7 +337,7 @@ const getUsers = (req, res) => {
     console.log('Trying to connect ...')
 }
 const getUser = (req, res) => {
-    findUserAsync(res, req.params.username).catch(console.dir);
+    findUserAsync(req, res).catch(console.dir);
     console.log('Trying to connect ...')
 }    
 const postUser = (req, res) => {
