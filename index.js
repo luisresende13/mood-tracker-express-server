@@ -342,7 +342,12 @@ const proxies = {
         target: 'https://api.openweathermap.org/data/2.5/weather',
         queryParams: {
             APPID: process.env.OPEN_WEATHER_MAP_APIKEY
-            // APPID: 'de9e6896f84109d7920528172207411a'
+        }
+    },
+    'email': {
+        target: 'https://emailverification.whoisxmlapi.com/api/v2',
+        queryParams: {
+            apiKey: process.env.EMAIL_VERIFICATION_APIKEY
         }
     }
 }
