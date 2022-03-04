@@ -426,7 +426,7 @@ const postUserSettings = (req, res) => {
 }
 const fetchApiUrl = (req, res) => {
     console.log('Trying to connect ...')
-    await sendApiResponse(req, res).catch(console.dir)
+    sendApiResponse(req, res).catch(console.dir)
 }
 
 var jsonParser = json()
