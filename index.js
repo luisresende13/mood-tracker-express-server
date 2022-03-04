@@ -340,8 +340,8 @@ const proxies = {
     'weather': {
         target: 'https://api.openweathermap.org/data/2.5/weather',
         queryParams: {
-            APP_ID: process.env.OPEN_WEATHER_MAP_APIKEY
-            // APP_ID: 'de9e6896f84109d7920528172207411a'
+            APPID: process.env.OPEN_WEATHER_MAP_APIKEY
+            // APPID: 'de9e6896f84109d7920528172207411a'
         }
     }
 }
