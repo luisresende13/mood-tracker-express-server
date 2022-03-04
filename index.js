@@ -356,11 +356,11 @@ function requestHandler(error, response, body) {
         console.log('POST api response successful!')
         console.log('LOGGING RESPONSE STATUS CODE...')
         console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-        console.log('LOGGING RESPONSE...')
-        console.log('statusCode:', response); // Print the response status code if a response was received
+        // console.log('LOGGING RESPONSE...')
+        // console.log('statusCode:', response); // Print the response status code if a response was received
         console.log('LOGGING RESPONSE BODY...')
         console.log('body:', body); // Print the HTML for the Google homepage.
-        res.json(JSON.stringify(body))
+        res.json(body)
         // res.json(JSON.stringify( body ))
     }
   }
@@ -425,8 +425,8 @@ const postUserSettings = (req, res) => {
     console.log('Trying to connect ...')
 }
 const fetchApiUrl = (req, res) => {
-    sendApiResponse(req, res).catch(console.dir)
     console.log('Trying to connect ...')
+    await sendApiResponse(req, res).catch(console.dir)
 }
 
 var jsonParser = json()
