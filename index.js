@@ -349,20 +349,14 @@ const proxies = {
 
 function requestHandler(res) {
     return (error, response, body) => {
-
         if (error) {
-            // console.log(error)
             throw new Error(error)
         } else {
             console.log('POST api response successful!')
-            console.log('LOGGING RESPONSE STATUS CODE...')
             console.log('statusCode:', response && response.statusCode);
-            console.log('LOGGING RESPONSE BODY...')
-            console.log('body:', body);
-            console.log('body type: ' + typeof(body))
             res.json(body)
         }
-      } 
+    } 
 }
 
 async function sendApiResponse(req, res) {
