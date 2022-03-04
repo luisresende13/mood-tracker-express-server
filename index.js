@@ -427,7 +427,7 @@ app.post('/Users/:username/emotions', jsonParser, postUserEmotion)
 app.delete('/Users/:username/emotions/:emotionName', deleteUserEmotion)
 app.post('/Users/:username/layout', jsonParser, postUserEmotionLayout)
 app.post('/Users/:username/settings', jsonParser, postUserSettings)
-app.get('/api/:apiName', jsonParser, fetchApiUrl)
+app.post('/api/:apiName', jsonParser, fetchApiUrl)
 
 app.get('/', (req, res) => {
     res.send('Mood Tracker App Server API.')
