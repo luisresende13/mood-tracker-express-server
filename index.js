@@ -376,7 +376,6 @@ async function sendApiResponse(req, res) {
     const apiParams = { ...req.body.queryParams, ...proxy.queryParams}
     const endpoint = req.body.endpoint ? '/'+req.body.endpoint : ''
     const targetUrl = proxy.target + endpoint + buildApiUriParams(apiParams)
-    console.log('PERFORMING API REQUEST FOR URL: ' + targetUrl)
     request(targetUrl, requestHandler(res));
 }
 
