@@ -354,7 +354,7 @@ function requestHandler(res) {
         } else {
             console.log('POST api response successful!')
             console.log('statusCode:', response && response.statusCode);
-            res.json(body)
+            res.json(JSON.stringify(JSON.parse(body)))
         }
     } 
 }
