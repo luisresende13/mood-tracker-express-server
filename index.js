@@ -359,6 +359,7 @@ function requestHandler(res) {
             console.log('statusCode:', response && response.statusCode);
             console.log('LOGGING RESPONSE BODY...')
             console.log('body:', body);
+            console.log('body type: ' + typeof(body))
             res.json(body)
         }
       } 
