@@ -367,9 +367,10 @@ function requestHandler(res) {
 async function sendApiResponse(req, res) {
     const proxy = proxies[req.params.apiName]
     const apiParams = { ...req.body, ...proxy.queryParams}
+    const endpoint = req.params.endpoint ? '/'+req.params.endpoint : ''
     console.log('LOGGING API REQUEST PARAMS...')
     console.log(JSON.stringify(apiParams))
-    const targetUrl = proxy.target + buildApiUriParams(apiParams)
+    const targetUrl = proxy.target + endpoint + buildApiUriParams(apiParams)
 
     console.log('Request received: POST api response. Attempting to fetch...')
     request(targetUrl, requestHandler(res));
@@ -433,6 +434,7 @@ app.delete('/Users/:username/emotions/:emotionName', deleteUserEmotion)
 app.post('/Users/:username/layout', jsonParser, postUserEmotionLayout)
 app.post('/Users/:username/settings', jsonParser, postUserSettings)
 app.post('/api/:apiName', jsonParser, fetchApiUrl)
+app.post('/api/:apiName/:endpoint', jsonParser, fetchApiUrl)
 
 app.get('/', (req, res) => {
     res.send('Mood Tracker App Server API.')
