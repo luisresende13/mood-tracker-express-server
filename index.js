@@ -353,8 +353,11 @@ function requestHandler(error, response, body) {
         throw new Error(error)
     } else {
         console.log('POST api response successful!')
+        console.log('LOGGING RESPONSE STATUS CODE...')
         console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+        console.log('LOGGING RESPONSE...')
         console.log('statusCode:', response); // Print the response status code if a response was received
+        console.log('LOGGING RESPONSE BODY...')
         console.log('body:', body); // Print the HTML for the Google homepage.
     
         // res.json(JSON.stringify( body ))
@@ -363,7 +366,10 @@ function requestHandler(error, response, body) {
 
 async function sendApiResponse(req, res) {
     const proxy = proxies[req.params.apiName]
-    const targetUrl = proxy.target + buildApiUriParams({ ...req.body, ...proxy.queryParams})
+    const apiParams = { ...req.body, ...proxy.queryParams}
+    console.log('LOGGING API REQUEST PARAMS...')
+    console.log(JSON.stringify(apiParams))
+    const targetUrl = proxy.target + buildApiUriParams(apiParams)
     try {
         console.log('Request received: POST api response. Attempting to fetch...')
         request(targetUrl, requestHandler);
