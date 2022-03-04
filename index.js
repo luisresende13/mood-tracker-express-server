@@ -2,6 +2,7 @@ const request = require('request');
 const { MongoClient, ObjectId } = require("mongodb");
 const express = require("express");
 const { json } = require('body-parser');
+const res = require('express/lib/response');
 const app = express();
 
 function mongoURI(mongoAdminPassword, databaseName) {
@@ -359,7 +360,7 @@ function requestHandler(error, response, body) {
         console.log('statusCode:', response); // Print the response status code if a response was received
         console.log('LOGGING RESPONSE BODY...')
         console.log('body:', body); // Print the HTML for the Google homepage.
-    
+        res.json(JSON.stringify(body))
         // res.json(JSON.stringify( body ))
     }
   }
