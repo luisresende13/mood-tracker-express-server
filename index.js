@@ -6,13 +6,18 @@ const app = express();
 
 function mongoURI(mongoAdminPassword, databaseName) {
     return "mongodb+srv://admin:" + mongoAdminPassword + "@mood-tracker-cluster.f0b5r.mongodb.net/" + databaseName + "?retryWrites=true&w=majority";
-}
+} 
 const databaseName = 'MoodTrackerDatabase'
 const mongoAdminPassword = 'admin'
-
 const uri = mongoURI(mongoAdminPassword, databaseName)
 const client = new MongoClient(uri);
 
+function buildApiUriParams(params) {
+    var uriParams = []
+    Object.keys(params).forEach( key => uriParams.push(key+'='+params[key]) )
+    return '?' + uriParams.join('&')
+  }
+ 
 async function findUsersAsync(res) {
     try {
         await client.connect();
@@ -331,6 +336,39 @@ async function postUserSettingsAsync(req, res) {
     }
 }
 
+const proxies = {
+    'weather': {
+        target: 'https://api.openweathermap.org/data/2.5/weather',
+        queryParams: {
+            APP_ID: process.env.OPEN_WEATHER_MAP_APIKEY
+        }
+    }
+}
+
+async function sendApiResponse(req, res) {
+    const proxy = proxies[req.params.apiName]
+    const targetUrl = proxy.target + buildApiUriParams({ ...req.body, ...proxy.queryParams})
+    try {
+        console.log('Request received: GET api response. Attempting to fetch...')
+        await fetch(targetUrl)
+        .then(apiRes => {
+            const resStatus = 'Status: ' + apiRes.status + ', Status Text: ' + apiRes.statusText
+            if (!apiRes.ok) {
+                console.log(apiRes.error)
+                throw new Error(resStatus)
+            } else {
+                console.log('GET api response successful!')
+                res.json(JSON.stringify( apiRes.json()))
+            }
+        })
+    } catch (error) {
+        console.log('Catched error...')
+        console.log(error)
+
+    } finally {
+        console.log('Database connection closed')
+    }
+}
 
 const getUsers = (req, res) => {
     findUsersAsync(res).catch(console.dir);
@@ -372,6 +410,10 @@ const postUserSettings = (req, res) => {
     postUserSettingsAsync(req, res).catch(console.dir);
     console.log('Trying to connect ...')
 }
+const fetchApiUrl = (req, res) => {
+    sendApiResponse(req, res).catch(console.dir)
+    console.log('Trying to connect ...')
+}
 
 var jsonParser = bodyParser.json()
 
@@ -385,6 +427,7 @@ app.post('/Users/:username/emotions', jsonParser, postUserEmotion)
 app.delete('/Users/:username/emotions/:emotionName', deleteUserEmotion)
 app.post('/Users/:username/layout', jsonParser, postUserEmotionLayout)
 app.post('/Users/:username/settings', jsonParser, postUserSettings)
+app.get('/api/:apiName', jsonParser, fetchApiUrl)
 
 app.get('/', (req, res) => {
     res.send('Mood Tracker App Server API.')
