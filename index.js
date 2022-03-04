@@ -1,7 +1,7 @@
+const request = require('request');
 const { MongoClient, ObjectId } = require("mongodb");
 const express = require("express");
-var bodyParser = require('body-parser')
-
+const { json } = require('body-parser');
 const app = express();
 
 function mongoURI(mongoAdminPassword, databaseName) {
@@ -341,26 +341,33 @@ const proxies = {
         target: 'https://api.openweathermap.org/data/2.5/weather',
         queryParams: {
             APP_ID: process.env.OPEN_WEATHER_MAP_APIKEY
+            // APP_ID: 'de9e6896f84109d7920528172207411a'
         }
     }
 }
+
+function requestHandler(error, response, body) {
+
+    if (error) {
+        // console.log(error)
+        throw new Error(error)
+    } else {
+        console.log('POST api response successful!')
+        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+        console.log('statusCode:', response); // Print the response status code if a response was received
+        console.log('body:', body); // Print the HTML for the Google homepage.
+    
+        // res.json(JSON.stringify( body ))
+    }
+  }
 
 async function sendApiResponse(req, res) {
     const proxy = proxies[req.params.apiName]
     const targetUrl = proxy.target + buildApiUriParams({ ...req.body, ...proxy.queryParams})
     try {
-        console.log('Request received: GET api response. Attempting to fetch...')
-        await fetch(targetUrl)
-        .then(apiRes => {
-            const resStatus = 'Status: ' + apiRes.status + ', Status Text: ' + apiRes.statusText
-            if (!apiRes.ok) {
-                console.log(apiRes.error)
-                throw new Error(resStatus)
-            } else {
-                console.log('GET api response successful!')
-                res.json(JSON.stringify( apiRes.json()))
-            }
-        })
+        console.log('Request received: POST api response. Attempting to fetch...')
+        request(targetUrl, requestHandler);
+          
     } catch (error) {
         console.log('Catched error...')
         console.log(error)
@@ -415,8 +422,7 @@ const fetchApiUrl = (req, res) => {
     console.log('Trying to connect ...')
 }
 
-var jsonParser = bodyParser.json()
-
+var jsonParser = json()
 app.get("/Users", getUsers);
 app.get('/Users/:username', getUser);
 app.post('/Users/:username', jsonParser, postUser)
