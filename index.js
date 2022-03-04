@@ -359,7 +359,7 @@ function requestHandler(res) {
         } else {
             console.log('POST api response successful!')
             console.log('statusCode:', response && response.statusCode);
-            res.json(JSON.stringify(JSON.parse(body)))
+            res.json(JSON.parse(body))
         }
     } 
 }
