@@ -347,23 +347,22 @@ const proxies = {
     }
 }
 
-function requestHandler(error, response, body) {
+function requestHandler(res) {
+    return (error, response, body) => {
 
-    if (error) {
-        // console.log(error)
-        throw new Error(error)
-    } else {
-        console.log('POST api response successful!')
-        console.log('LOGGING RESPONSE STATUS CODE...')
-        console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-        // console.log('LOGGING RESPONSE...')
-        // console.log('statusCode:', response); // Print the response status code if a response was received
-        console.log('LOGGING RESPONSE BODY...')
-        console.log('body:', body); // Print the HTML for the Google homepage.
-        res.json(body)
-        // res.json(JSON.stringify( body ))
-    }
-  }
+        if (error) {
+            // console.log(error)
+            throw new Error(error)
+        } else {
+            console.log('POST api response successful!')
+            console.log('LOGGING RESPONSE STATUS CODE...')
+            console.log('statusCode:', response && response.statusCode);
+            console.log('LOGGING RESPONSE BODY...')
+            console.log('body:', body);
+            res.json(body)
+        }
+      } 
+}
 
 async function sendApiResponse(req, res) {
     const proxy = proxies[req.params.apiName]
@@ -371,17 +370,10 @@ async function sendApiResponse(req, res) {
     console.log('LOGGING API REQUEST PARAMS...')
     console.log(JSON.stringify(apiParams))
     const targetUrl = proxy.target + buildApiUriParams(apiParams)
-    try {
-        console.log('Request received: POST api response. Attempting to fetch...')
-        request(targetUrl, requestHandler);
-          
-    } catch (error) {
-        console.log('Catched error...')
-        console.log(error)
 
-    } finally {
-        console.log('Database connection closed')
-    }
+    console.log('Request received: POST api response. Attempting to fetch...')
+    request(targetUrl, requestHandler(res));
+          
 }
 
 const getUsers = (req, res) => {
