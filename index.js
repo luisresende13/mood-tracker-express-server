@@ -349,6 +349,12 @@ const proxies = {
         queryParams: {
             apiKey: process.env.EMAIL_VERIFICATION_APIKEY
         }
+    },
+    'unsplash': {
+        target: 'https://api.unsplash.com',
+        queryParams: {
+            client_id: process.env.UNSPLASH_APIKEY
+        }
     }
 }
 
