@@ -371,16 +371,12 @@ function requestHandler(res) {
 }
 
 async function sendApiResponse(req, res) {
-    const proxy = proxies[req.params.apiName]
-    const apiParams = { ...req.body, ...proxy.queryParams}
-    const endpoint = req.params.endpoint ? '/'+req.params.endpoint : ''
-    console.log('LOGGING API REQUEST PARAMS...')
-    console.log(JSON.stringify(apiParams))
-    const targetUrl = proxy.target + endpoint + buildApiUriParams(apiParams)
-
     console.log('Request received: POST api response. Attempting to fetch...')
+    const proxy = proxies[req.params.apiName]
+    const apiParams = { ...req.body.queryParams, ...proxy.queryParams}
+    const endpoint = req.body.endpoint ? '/'+req.body.endpoint : ''
+    const targetUrl = proxy.target + endpoint + buildApiUriParams(apiParams)
     request(targetUrl, requestHandler(res));
-          
 }
 
 const getUsers = (req, res) => {
