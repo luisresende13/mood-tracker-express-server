@@ -2,7 +2,7 @@ const request = require('request');
 const { MongoClient, ObjectId } = require("mongodb");
 const express = require("express");
 const { json } = require('body-parser');
-const res = require('express/lib/response');
+// const res = require('express/lib/response');
 const app = express();
 
 function mongoURI(mongoAdminPassword, databaseName) {
@@ -46,7 +46,7 @@ async function findUserAsync(req, res) {
         const userQuery = { username: req.params.username };
         const userResult = await userCollection.findOne(userQuery);
         console.log('Searched for username :"' + req.params.username + '" - Found:\n' + JSON.stringify(userResult))
-        res.send(JSON.stringify(userResult))
+        res.json(userResult)
 
     } finally {
         await client.close();
@@ -64,12 +64,6 @@ async function postUserAsync(req, res) {
         console.log('Handling POST request for user: ' + req.params.username)
         const user_doc = {
             ...req.body,
-            // username: req.params.username,
-            // password: req.body.password,
-            // email: req.body.email,
-            // emotions: req.body.emotions,
-            // entries: req.body.entries,
-            // layout: req.body.layout
         }
         const userResult = await userCollection.insertOne(user_doc);
 
