@@ -1,9 +1,8 @@
 const request = require('request');
 const { MongoClient, ObjectId } = require("mongodb");
 const express = require("express");
+var cors = require('cors')
 const { json } = require('body-parser');
-// const res = require('express/lib/response');
-const app = express();
 
 function mongoURI(mongoAdminPassword, databaseName) {
     return "mongodb+srv://admin:" + mongoAdminPassword + "@mood-tracker-cluster.f0b5r.mongodb.net/" + databaseName + "?retryWrites=true&w=majority";
@@ -418,18 +417,27 @@ const fetchApiUrl = (req, res) => {
     sendApiResponse(req, res).catch(console.dir)
 }
 
-var jsonParser = json()
+const corsOptions = {
+    "origin": "*",
+    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+    "preflightContinue": false,
+    "optionsSuccessStatus": 204
+}
+
+const app = express();
+app.use(cors(corsOptions))
+// app.options('*', cors())
 app.get("/Users", getUsers);
 app.get('/Users/:username', getUser);
-app.post('/Users/:username', jsonParser, postUser)
-app.post('/Users/:username/entries', jsonParser, postUserEntry)
+app.post('/Users/:username', json(), postUser)
+app.post('/Users/:username/entries', json(), postUserEntry)
 app.delete('/Users/:username/entries/:entryId', deleteUserEntry)
-app.put('/Users/:username/entries/:entryId', jsonParser, putUserEntry)
-app.post('/Users/:username/emotions', jsonParser, postUserEmotion)
+app.put('/Users/:username/entries/:entryId', json(), putUserEntry)
+app.post('/Users/:username/emotions', json(), postUserEmotion)
 app.delete('/Users/:username/emotions/:emotionName', deleteUserEmotion)
-app.post('/Users/:username/layout', jsonParser, postUserEmotionLayout)
-app.post('/Users/:username/settings', jsonParser, postUserSettings)
-app.post('/api/:apiName', jsonParser, fetchApiUrl)
+app.post('/Users/:username/layout', json(), postUserEmotionLayout)
+app.post('/Users/:username/settings', json(), postUserSettings)
+app.post('/api/:apiName', json(), fetchApiUrl)
 
 app.get('/', (req, res) => {
     res.send('Mood Tracker App Server API.')
