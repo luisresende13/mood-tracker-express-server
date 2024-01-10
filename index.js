@@ -5,9 +5,9 @@ var cors = require('cors')
 const { json } = require('body-parser');
 
 function mongoURI(mongoAdminPassword, databaseName) {
-    return "mongodb+srv://admin:" + mongoAdminPassword + "@mood-tracker-cluster.f0b5r.mongodb.net/" + databaseName + "?retryWrites=true&w=majority";
+    return "mongodb+srv://admin:" + mongoAdminPassword + "@pluvia-cluster.ea8fb4s.mongodb.net/" + databaseName + "?retryWrites=true&w=majority";
 } 
-const databaseName = 'MoodTrackerDatabase'
+const databaseName = 'MoodTracker'
 const mongoAdminPassword = 'admin'
 const uri = mongoURI(mongoAdminPassword, databaseName)
 const client = new MongoClient(uri);
